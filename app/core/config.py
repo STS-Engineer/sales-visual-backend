@@ -26,7 +26,10 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
+    SMTP_USE_AUTH: bool = True
     EMAIL_FROM: str = ""
+    smtp_from: str | None = None
+    email_test_override: str | None = None
     AZURE_CONNECTION_STRING: str = ""
     AZURE_BLOB_CONTAINER: str = "sales-visual-files"
 

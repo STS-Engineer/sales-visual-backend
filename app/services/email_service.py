@@ -164,10 +164,11 @@ def _send_message(report: MonthlyReport, client: Client, kam: Kam) -> dict[str, 
         raise RuntimeError("SMTP settings are not configured")
 
     subject = notification_subject(report, client)
+    recipient = (settings.email_test_override or "").strip() or kam.email
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = settings.EMAIL_FROM
-    msg["To"] = kam.email
+    msg["To"] = recipient
     msg.set_content(
         f"Bonjour {kam.name},\n\n"
         f"Le rapport mensuel pour {client.name} est maintenant disponible.\n\n"
@@ -175,9 +176,14 @@ def _send_message(report: MonthlyReport, client: Client, kam: Kam) -> dict[str, 
     )
     msg.add_alternative(render_kam_notification_html(report, client, kam), subtype="html")
 
+    logger.info("=== PRE-SEND DEBUG ===")
+    logger.info("recipient = %s", recipient)
+    logger.info("msg[\"To\"] = %s", msg["To"])
+    logger.info("kam.email = %s", kam.email)
+
     with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as smtp:
         smtp.starttls()
-        if settings.SMTP_USER:
+        if settings.SMTP_USE_AUTH and settings.SMTP_USER:
             smtp.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
         refused = smtp.send_message(msg)
 
@@ -185,7 +191,7 @@ def _send_message(report: MonthlyReport, client: Client, kam: Kam) -> dict[str, 
         raise RuntimeError(f"SMTP refused recipients: {refused}")
 
     return {
-        "recipient": kam.email,
+        "recipient": recipient,
         "subject": subject,
         "smtp_refused_recipients": refused,
     }
