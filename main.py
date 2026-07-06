@@ -20,6 +20,7 @@ from app.api.monday import router as monday_router
 from app.api.reports import router as reports_router
 from app.api.test_email import router as test_email_router
 from app.api.visuals import router as visuals_router
+from app.core.config import settings
 from app.services.blob_service import ensure_container_exists
 
 logging.basicConfig(
@@ -35,7 +36,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        origin.strip()
+        for origin in settings.BACKEND_CORS_ORIGINS.split(",")
+        if origin.strip()
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

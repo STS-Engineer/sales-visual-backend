@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     PUBLIC_APP_URL: str = "http://localhost:8000"
+    BACKEND_CORS_ORIGINS: str = "http://localhost:5173"
 
     # ─── Monday.com ────────────────────────────────────────────
     MONDAY_API_TOKEN: str
